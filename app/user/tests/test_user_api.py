@@ -14,6 +14,7 @@ def create_user(**params):
 
 CREATE_USER_URL = reverse('user:create')
 OBTAIN_TOKEN_URL = reverse('user:obtain-token')
+ME_URL = reverse('user:me')
 
 
 class PublicUserApiTests(TestCase):
@@ -121,3 +122,91 @@ class PublicUserApiTests(TestCase):
         res = self.client.post(OBTAIN_TOKEN_URL, payload, "json")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', res.data)
+
+    def test_fail_to_retrive_user_unauthorized(self):
+        """
+        test retrive user with unauthorized user.
+        """
+
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(
+            res.status_code,
+            status.HTTP_401_UNAUTHORIZED)
+
+
+class PrivateUserApiTests(TestCase):
+    """
+    Tests for public user app endpoints.
+    Such as retrive,update and delete user info.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = create_user(**{
+            "email": "test@test.com", "password": "supersecret"
+        })
+        self.client.force_authenticate(self.user)
+
+    def test_retrive_user_page(self):
+        """test retrive user own page."""
+
+        res = self.client.get(ME_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('email', res.data)
+        self.assertNotIn('password', res.data)
+
+    def test_update_own_info_partial(self):
+        """
+        test update owned user info partial..
+        """
+        payload = {"email": "updated@test.com"}
+        res = self.client.patch(ME_URL, payload, "json")
+        self.user.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.user.email, payload['email'])
+
+    def test_method_not_allowed(self):
+        """
+        test rejected to post method on user me url.
+        """
+        res = self.client.post(ME_URL, {})
+        self.assertEqual(
+            res.status_code,
+            status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_update_user_info_fully(self):
+        """
+        test update owned user info completely.
+        """
+        payload = {
+            "email": "updated@test.com", "password": "updated_super_secret"
+        }
+        res = self.client.put(ME_URL, payload, "json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password(payload['password']))
+        self.assertEqual(self.user.email, payload['email'])
+
+    def test_fail_existing_email(self):
+        """
+        test updating user profile with already registered email.
+        """
+        payload = {
+            "email": "existing@test.com",
+            "password": "existing"}
+        create_user(**payload)
+
+        update_payload = {"email": "existing@test.com"}
+
+        res = self.client.patch(ME_URL, update_payload, "json")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_delete_user_owned_account(self):
+        """
+        test delete owned account successfully.
+        """
+        res = self.client.delete(ME_URL)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(get_user_model().objects.all().count(), 0)

@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.authtoken.views import ObtainAuthToken
-from .api import CreateUser
+from .api import CreateUser, ManageUser
 from .serializers import AuthTokenSerializer
 app_name = "user"
 
@@ -9,5 +9,6 @@ urlpatterns = [
     path(
         'obtain-token/',
         ObtainAuthToken.as_view(serializer_class=AuthTokenSerializer),
-        name="obtain-token")
+        name="obtain-token"),
+    path('me/', ManageUser.as_view(), name='me')
 ]

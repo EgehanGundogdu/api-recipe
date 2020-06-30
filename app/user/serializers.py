@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            "email", "password",
+            "email", "password", "first_name", "last_name"
         ]
         extra_kwargs = {"password": {"write_only": True}}
 
@@ -35,6 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
         uses the create_user method of the defined user model
         instead of the default model create method."""
         return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            instance.set_password(validated_data.pop('password'))
+        return super().update(instance, validated_data)
 
 
 class AuthTokenSerializer(BaseAuthTokenSerializer):

@@ -1,9 +1,9 @@
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import validate_password as auth_password_validator
+from django.contrib.auth.password_validation import validate_password as auth_password_validator  # noqa
 from rest_framework import serializers
-from rest_framework.authtoken.serializers import AuthTokenSerializer as BaseAuthTokenSerializer
+from rest_framework.authtoken.serializers import AuthTokenSerializer as BaseAuthTokenSerializer  # noqa
 UserModel = get_user_model()
 
 
@@ -20,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_password(self, value):
         """
-        Validates to password value with built in django auth password validators.
+        Validates to password value with built in
+        django auth password validators.
         """
         try:
             auth_password_validator(value, self.instance)

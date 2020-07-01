@@ -39,6 +39,7 @@ class Recipe(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
     tags = models.ManyToManyField('recipe.Tag')
     ingredients = models.ManyToManyField('recipe.Ingredient')
+    link = models.URLField(blank=True)
 
     def __str__(self):
         "string representation of recipe objects."

@@ -27,3 +27,19 @@ class Ingredient(models.Model):
     def __str__(self):
         "String representation of ingredient instance"
         return self.name
+
+
+class Recipe(models.Model):
+    "recipe objects."
+    name = models.CharField(max_length=255)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE)
+    cook_minutes = models.PositiveSmallIntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    tags = models.ManyToManyField('recipe.Tag')
+    ingredients = models.ManyToManyField('recipe.Ingredient')
+
+    def __str__(self):
+        "string representation of recipe objects."
+        return self.name

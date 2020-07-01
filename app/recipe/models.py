@@ -15,3 +15,15 @@ class Tag(models.Model):
     def __str__(self):
         "String representation of tag instance."
         return self.name
+
+
+class Ingredient(models.Model):
+    "Ingredient model."
+    name = models.CharField(max_length=30)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE)
+
+    def __str__(self):
+        "String representation of ingredient instance"
+        return self.name

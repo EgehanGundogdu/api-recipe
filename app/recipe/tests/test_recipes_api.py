@@ -146,3 +146,45 @@ class PrivateApiTests(TestCase):
         self.assertListEqual(
             recipe_ingredients, [
                 ingredient, ingredient1])
+
+    def test_partial_update_recipe(self):
+        """test for partial update recipe objects."""
+        recipe = create_new_recipe(
+            self.user,
+            name="Chicken wings", price=12.00, cook_minutes=12)
+        ingredient = Ingredient.objects.create(
+            name="meanless ingredient", owner=self.user
+        )
+        url = populate_recipe_detail_url(recipe.id)
+
+        payload = {
+            "name": "Updated wings!",
+            "ingredients": [ingredient.id]
+        }
+        res = self.client.patch(url, payload, "json")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.name, payload['name'])
+
+    def test_full_update_recipe(self):
+        """test fully update recipe uses put method."""
+        recipe = create_new_recipe(
+            self.user,
+            name="Chicken wings", price=12.00, cook_minutes=12)
+        url = populate_recipe_detail_url(recipe.id)
+        tag = Tag.objects.create(
+            name="meanless tag",
+            owner=self.user)
+        payload = {
+            "name": "Updated wings",
+            "price": 481.32,
+            "cook_minutes": 15,
+            "tags": [tag.id],
+            "ingredients": []
+        }
+        res = self.client.put(url, payload, "json")
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        recipe.refresh_from_db()
+        self.assertEqual(recipe.tags.all().count(), 1)
+        self.assertEqual(recipe.name, payload['name'])

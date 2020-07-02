@@ -28,10 +28,24 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = "__all__"
+        fields = [
+            "id",
+            "name",
+            "tags",
+            "ingredients",
+            "cook_minutes",
+            "price"]
         read_only_fields = [
             "id"
         ]
+        # extra_kwargs = {
+        #     "tags": {
+        #         "allow_blank": True,
+        #     },
+        #     "ingredients": {
+        #         "allow_blank": True
+        #     }
+        # }
 
 
 class RecipeDetailSerializer(RecipeSerializer):

@@ -1,6 +1,6 @@
 from rest_framework import viewsets, authentication, permissions
 from ..models import Recipe
-from ..serializers import RecipeSerializer
+from ..serializers import RecipeSerializer, RecipeDetailSerializer
 
 
 class ManageRecipe(viewsets.ModelViewSet):
@@ -17,3 +17,10 @@ class ManageRecipe(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         "assocaite a foreign key with user"
         serializer.save(owner=self.request.user)
+
+    def get_serializer_class(self, *args, **kwargs):
+        """Returns the serializer class according to the action type."""
+        if self.action == "retrieve":
+            "this means request to object detail."
+            return RecipeDetailSerializer
+        return self.serializer_class

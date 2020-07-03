@@ -1,6 +1,15 @@
 from django.db import models
 from django.conf import settings
+import os
+import uuid
 # Create your models here.
+
+
+def generate_recipe_image_path(instance, filename):
+    "generates dynamic file upload path with uuid."
+    file_extension = filename.split('.')[-1]
+    generated_name = f"{uuid.uuid4()}.{file_extension}"
+    return os.path.join('uploads/recipe/', generated_name)
 
 
 class Tag(models.Model):
@@ -40,6 +49,8 @@ class Recipe(models.Model):
     tags = models.ManyToManyField('recipe.Tag')
     ingredients = models.ManyToManyField('recipe.Ingredient')
     link = models.URLField(blank=True)
+    image = models.ImageField(blank=True,
+                              upload_to=generate_recipe_image_path)
 
     def __str__(self):
         "string representation of recipe objects."
